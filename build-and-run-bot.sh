@@ -64,18 +64,44 @@ if [ -z "$ALLOWED_USER_IDS" ] || [ "$ALLOWED_USER_IDS" = "123456789,987654321" ]
 fi
 
 # Create logs directory if it doesn't exist
-print_status "Setting up logs directory..."
+print_status "Setting up directories..."
 if [ -n "$DEPLOY_ROOT_DIR" ] && [ "$DEPLOY_ROOT_DIR" != "." ]; then
     # Using DEPLOY_ROOT_DIR from .env
     LOGS_DIR="${DEPLOY_ROOT_DIR}/logs"
+    DATA_DIR="${DEPLOY_ROOT_DIR}/data"
+    
     mkdir -p "$LOGS_DIR"
     chmod 777 "$LOGS_DIR"
+    
+    mkdir -p "$DATA_DIR"
+    chmod 755 "$DATA_DIR"
+    
+    # Copy .env to data directory if it doesn't exist
+    if [ ! -f "$DATA_DIR/.env" ]; then
+        print_status "Copying .env to $DATA_DIR"
+        cp .env "$DATA_DIR/.env"
+        chmod 644 "$DATA_DIR/.env"
+    fi
+    
     print_status "Logs directory: $LOGS_DIR"
+    print_status "Data directory: $DATA_DIR"
 else
-    # Using local logs directory
+    # Using local directories
     mkdir -p logs
     chmod 777 logs
+    
+    mkdir -p data
+    chmod 755 data
+    
+    # Copy .env to data directory if it doesn't exist
+    if [ ! -f "data/.env" ]; then
+        print_status "Copying .env to data/"
+        cp .env data/.env
+        chmod 644 "data/.env"
+    fi
+    
     print_status "Logs directory: ./logs"
+    print_status "Data directory: ./data"
 fi
 
 print_status "Stopping existing containers..."

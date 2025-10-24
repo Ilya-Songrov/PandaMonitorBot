@@ -7,6 +7,7 @@ services:
       - .env
     volumes:
       - ${DEPLOY_ROOT_DIR:-.}/logs:/app/logs
+      - ${DEPLOY_ROOT_DIR:-.}/data/.env:/app/.env:ro
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
     environment:
