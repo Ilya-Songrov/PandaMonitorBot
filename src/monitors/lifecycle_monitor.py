@@ -17,7 +17,12 @@ logger = logging.getLogger(__name__)
 class LifecycleMonitor:
     """Monitor bot lifecycle (start/stop) to track computer on/off status"""
     
-    def __init__(self, data_file: str = "logs/lifecycle_data.json"):
+    def __init__(self, data_file: str = None):
+        if data_file is None:
+            # Use local logs directory (works both locally and in Docker)
+            logs_dir = Path("logs")
+            data_file = str(logs_dir / "lifecycle_data.json")
+        
         self.data_file = data_file
         self.current_startup_time = datetime.now()
         self.is_enabled = True
@@ -62,7 +67,8 @@ class LifecycleMonitor:
     
     def _get_session_history_file(self) -> str:
         """Get session history file path"""
-        return "logs/session_history.json"
+        logs_dir = Path("logs")
+        return str(logs_dir / "session_history.json")
     
     def _load_session_history(self) -> List[Dict]:
         """Load session history from file"""

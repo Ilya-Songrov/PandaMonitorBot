@@ -21,7 +21,9 @@ COPY . .
 
 # Create non-root user for security
 RUN adduser --disabled-password --gecos '' botuser && \
+    mkdir -p /app/logs && \
     chown -R botuser:botuser /app
+
 USER botuser
 
 # Run the bot

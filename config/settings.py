@@ -13,6 +13,9 @@ load_dotenv()
 class Settings:
     """Bot settings configuration"""
     
+    # Deployment settings
+    DEPLOY_ROOT_DIR: str = os.getenv('DEPLOY_ROOT_DIR', '.')
+    
     # Bot configuration
     BOT_TOKEN: str = os.getenv('BOT_TOKEN', '')
     ALLOWED_USER_IDS: List[int] = [

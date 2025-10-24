@@ -64,7 +64,19 @@ if [ -z "$ALLOWED_USER_IDS" ] || [ "$ALLOWED_USER_IDS" = "123456789,987654321" ]
 fi
 
 # Create logs directory if it doesn't exist
-mkdir -p logs
+print_status "Setting up logs directory..."
+if [ -n "$DEPLOY_ROOT_DIR" ] && [ "$DEPLOY_ROOT_DIR" != "." ]; then
+    # Using DEPLOY_ROOT_DIR from .env
+    LOGS_DIR="${DEPLOY_ROOT_DIR}/logs"
+    mkdir -p "$LOGS_DIR"
+    chmod 777 "$LOGS_DIR"
+    print_status "Logs directory: $LOGS_DIR"
+else
+    # Using local logs directory
+    mkdir -p logs
+    chmod 777 logs
+    print_status "Logs directory: ./logs"
+fi
 
 print_status "Stopping existing containers..."
 docker compose down 2>/dev/null || true

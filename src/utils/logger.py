@@ -10,8 +10,9 @@ from config.settings import settings
 
 def setup_logging():
     """Setup logging configuration with console and file handlers"""
-    # Ensure logs directory exists
-    Path("logs").mkdir(parents=True, exist_ok=True)
+    # Use local logs directory (works both locally and in Docker)
+    logs_dir = Path("logs")
+    logs_dir.mkdir(parents=True, exist_ok=True)
     
     # Create formatters
     formatter = logging.Formatter(
@@ -24,8 +25,9 @@ def setup_logging():
     console_handler.setFormatter(formatter)
     
     # File handler
+    log_file_path = logs_dir / settings.LOG_FILE
     file_handler = logging.FileHandler(
-        f'logs/{settings.LOG_FILE}',
+        log_file_path,
         encoding='utf-8'
     )
     file_handler.setLevel(getattr(logging, settings.LOG_LEVEL.upper(), logging.INFO))
