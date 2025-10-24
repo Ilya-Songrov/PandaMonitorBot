@@ -1,0 +1,24 @@
+services:
+  panda_monitor_bot:
+    build: .
+    container_name: panda-monitor-bot
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - ./logs:/app/logs
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+    environment:
+      - PYTHONPATH=/app
+    networks:
+      - panda_monitor_bot_network
+
+networks:
+  panda_monitor_bot_network:
+    driver: bridge
+
+volumes:
+  logs:
+    driver: local
+
