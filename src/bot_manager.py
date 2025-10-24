@@ -19,7 +19,7 @@ class BotManager:
         self.application = None
         self.computer_monitor = ComputerMonitor()
         
-    async def start(self):
+    async def start(self, stop_event):
         """Start the bot"""
         if not settings.validate():
             logger.error("Invalid configuration. Please check your settings.")
@@ -36,21 +36,28 @@ class BotManager:
         
         # Initialize and start the bot
         logger.info("Starting PandaMonitorBot...")
-        await self.application.initialize()
-        await self.application.start()
-        await self.application.updater.start_polling(allowed_updates=Update.ALL_TYPES)
-        
-        # Keep the bot running
         try:
-            # Run until interrupted
-            import asyncio
-            await asyncio.Event().wait()
-        except (KeyboardInterrupt, SystemExit):
-            logger.info("Stopping PandaMonitorBot...")
+            await self.application.initialize()
+            await self.application.start()
+            await self.application.updater.start_polling(allowed_updates=Update.ALL_TYPES)
+            
+            # Keep the bot running until stop_event is set
+            logger.info("Bot is running. Press Ctrl+C to stop.")
+            await stop_event.wait()
+            
+        except Exception as e:
+            logger.error(f"Error during bot operation: {e}", exc_info=True)
         finally:
-            await self.application.updater.stop()
-            await self.application.stop()
-            await self.application.shutdown()
+            logger.info("Stopping PandaMonitorBot...")
+            try:
+                if self.application.updater.running:
+                    await self.application.updater.stop()
+                if self.application.running:
+                    await self.application.stop()
+                await self.application.shutdown()
+                logger.info("Bot shutdown complete")
+            except Exception as e:
+                logger.error(f"Error during shutdown: {e}", exc_info=True)
         
     def _add_handlers(self):
         """Add command handlers"""
