@@ -34,7 +34,6 @@ class Settings:
     @classmethod
     def validate(cls) -> bool:
         """Validate required settings"""
-        print(f"Validating settings: BOT_TOKEN={cls.BOT_TOKEN}, ALLOWED_USER_IDS={cls.ALLOWED_USER_IDS}")
         if not cls.BOT_TOKEN:
             return False
         if not cls.ALLOWED_USER_IDS:

@@ -4,18 +4,15 @@ PandaMonitorBot - Telegram bot for monitoring computer status and other tasks
 """
 
 import asyncio
-import logging
 import signal
-import sys
+from src.utils.logger import setup_logging, get_logger
 from src.bot_manager import BotManager
 
 
 # Setup logging
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO
-)
-logger = logging.getLogger(__name__)
+setup_logging()
+logger = get_logger(__name__)
+
 
 async def main():
     """Main function to start the bot"""
