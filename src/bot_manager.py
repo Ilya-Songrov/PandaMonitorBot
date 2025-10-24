@@ -15,8 +15,7 @@ logger = logging.getLogger(__name__)
 class BotManager:
     """Main bot manager class"""
     
-    def __init__(self, token: str):
-        self.token = token
+    def __init__(self):
         self.application = None
         self.computer_monitor = ComputerMonitor()
         
@@ -27,7 +26,7 @@ class BotManager:
             return
             
         # Create application
-        self.application = Application.builder().token(self.token).build()
+        self.application = Application.builder().token(settings.BOT_TOKEN).build()
         
         # Add handlers
         self._add_handlers()
@@ -35,9 +34,23 @@ class BotManager:
         # Start monitors
         await self._start_monitors()
         
-        # Start the bot
+        # Initialize and start the bot
         logger.info("Starting PandaMonitorBot...")
-        await self.application.run_polling(allowed_updates=Update.ALL_TYPES)
+        await self.application.initialize()
+        await self.application.start()
+        await self.application.updater.start_polling(allowed_updates=Update.ALL_TYPES)
+        
+        # Keep the bot running
+        try:
+            # Run until interrupted
+            import asyncio
+            await asyncio.Event().wait()
+        except (KeyboardInterrupt, SystemExit):
+            logger.info("Stopping PandaMonitorBot...")
+        finally:
+            await self.application.updater.stop()
+            await self.application.stop()
+            await self.application.shutdown()
         
     def _add_handlers(self):
         """Add command handlers"""

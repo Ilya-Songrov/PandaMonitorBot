@@ -11,4 +11,3 @@ Telegram бот для моніторингу статусу комп'ютера
 - [Deploy on Server](docs/README-Deploy-on-Server.md)
 
 
-

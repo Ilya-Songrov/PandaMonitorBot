@@ -4,6 +4,11 @@ Configuration settings for PandaMonitorBot
 
 import os
 from typing import List
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
 
 class Settings:
     """Bot settings configuration"""
@@ -29,6 +34,7 @@ class Settings:
     @classmethod
     def validate(cls) -> bool:
         """Validate required settings"""
+        print(f"Validating settings: BOT_TOKEN={cls.BOT_TOKEN}, ALLOWED_USER_IDS={cls.ALLOWED_USER_IDS}")
         if not cls.BOT_TOKEN:
             return False
         if not cls.ALLOWED_USER_IDS:

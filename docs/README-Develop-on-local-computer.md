@@ -2,15 +2,23 @@
 
 ## Develop on local computer
 
-#### How to run in terminal:
+#### How to setup development environment:
 ```bash
 python3.10 -m venv ./venv
 source venv/bin/activate
-python --version # Python 3.10.9
+python --version # Python 3.10.12
 pip3.10 install -r requirements.txt
-python3.10 main.py --help
 ```
 
+#### How to run in terminal:
+```bash
+cp .env.example .env
+echo '
+BOT_TOKEN=your_bot_token_here
+ALLOWED_USER_IDS=123456789
+' >> .env
+python3.10 bot.py
+```
 
 #### Додавання нових функцій:
 1. **Нові команди**: Додайте в `src/handlers/command_handlers.py`
