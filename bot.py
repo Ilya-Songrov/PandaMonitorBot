@@ -26,7 +26,8 @@ async def main():
     stop_event = asyncio.Event()
     
     def signal_handler(sig, frame):
-        logger.info(f"Received signal {sig}, initiating graceful shutdown...")
+        signal_name = signal.Signals(sig).name  # перетворює 2 → SIGINT
+        logger.info(f"Received signal {signal_name} ({sig}), initiating graceful shutdown...")
         stop_event.set()
     
     # Register signal handlers

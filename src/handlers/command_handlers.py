@@ -41,6 +41,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 /monitor - Запустити моніторинг
 /stop_monitor - Зупинити моніторинг
 /system_info - Детальна інформація про систему
+/lifecycle_status - Статус lifecycle монітора
 
 🔧 Адміністративні команди будуть додані в майбутньому.
 """
@@ -117,3 +118,50 @@ async def system_info_command(update: Update, context: ContextTypes.DEFAULT_TYPE
     except Exception as e:
         logger.error(f"Error getting system info: {e}")
         await update.message.reply_text("❌ Помилка при отриманні системної інформації")
+
+@authorized_only
+async def lifecycle_status_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /lifecycle_status command"""
+    try:
+        # Get bot manager's lifecycle monitor if available
+        from src.monitors.lifecycle_monitor import LifecycleMonitor
+        
+        # Create temp monitor to read stats
+        monitor = LifecycleMonitor()
+        info = monitor.get_info()
+        stats = info['today_stats']
+        
+        # Format uptime
+        uptime = stats['total_uptime']
+        hours, remainder = divmod(int(uptime.total_seconds()), 3600)
+        minutes, _ = divmod(remainder, 60)
+        uptime_str = f"{hours}г {minutes}м" if hours > 0 else f"{minutes}м"
+        
+        # Format times
+        current_start = info['startup_time'].strftime('%H:%M:%S')
+        first_start = stats['first_start'].strftime('%H:%M:%S') if stats['first_start'] else "N/A"
+        
+        # Downtime info
+        downtime_info = ""
+        if info['last_shutdown']:
+            last_shutdown = info['last_shutdown'].strftime('%Y-%m-%d %H:%M:%S')
+            downtime_info = f"\n🔴 Останнє вимкнення: {last_shutdown}"
+        
+        message = f"""
+🔄 Lifecycle Monitor статус:
+
+🖥️ Комп'ютер: {info['computer_name']}
+🟢 Поточний старт: {current_start}
+✅ Моніторинг: Активний{downtime_info}
+
+📊 Статистика за сьогодні ({stats['session_count']} сесій):
+• Перший запуск: {first_start}
+• Загальний час роботи: {uptime_str}
+
+ℹ️ Інтервал оновлення: {settings.MONITOR_INTERVAL} сек
+💾 Дані зберігаються в: logs/lifecycle_data.json
+"""
+        await update.message.reply_text(message)
+    except Exception as e:
+        logger.error(f"Error getting lifecycle status: {e}", exc_info=True)
+        await update.message.reply_text("❌ Помилка при отриманні статусу lifecycle монітора")

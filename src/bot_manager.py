@@ -2,13 +2,17 @@
 Bot Manager - Main bot management class
 """
 
+import json
 import logging
+import os
+from datetime import datetime
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 
 from config.settings import settings
 from src.handlers import command_handlers
 from src.monitors.computer_monitor import ComputerMonitor
+from src.monitors.lifecycle_monitor import LifecycleMonitor
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +22,7 @@ class BotManager:
     def __init__(self):
         self.application = None
         self.computer_monitor = ComputerMonitor()
+        self.lifecycle_monitor = LifecycleMonitor()
         
     async def start(self, stop_event):
         """Start the bot"""
@@ -31,8 +36,8 @@ class BotManager:
         # Add handlers
         self._add_handlers()
         
-        # Start monitors
-        await self._start_monitors()
+        # Don't start monitors automatically - user should use /monitor command
+        # await self._start_monitors()
         
         # Initialize and start the bot
         logger.info("Starting PandaMonitorBot...")
@@ -40,6 +45,23 @@ class BotManager:
             await self.application.initialize()
             await self.application.start()
             await self.application.updater.start_polling(allowed_updates=Update.ALL_TYPES)
+            
+            # Store startup time in bot_data
+            self.application.bot_data['startup_time'] = self.lifecycle_monitor.current_startup_time.strftime('%Y-%m-%d %H:%M:%S')
+            
+            # Send startup notification
+            await self.lifecycle_monitor.send_startup_notification(self.application)
+            
+            # Start lifecycle activity tracker (periodic updates)
+            job_queue = self.application.job_queue
+            if job_queue:
+                job_queue.run_repeating(
+                    self.lifecycle_monitor.update_activity,
+                    interval=settings.MONITOR_INTERVAL,
+                    first=settings.MONITOR_INTERVAL,
+                    name="lifecycle_activity_tracker"
+                )
+                logger.info("Lifecycle activity tracker started")
             
             # Keep the bot running until stop_event is set
             logger.info("Bot is running. Press Ctrl+C to stop.")
@@ -68,6 +90,7 @@ class BotManager:
             CommandHandler("monitor", command_handlers.monitor_command),
             CommandHandler("stop_monitor", command_handlers.stop_monitor_command),
             CommandHandler("system_info", command_handlers.system_info_command),
+            CommandHandler("lifecycle_status", command_handlers.lifecycle_status_command),
         ]
         
         for handler in handlers:
