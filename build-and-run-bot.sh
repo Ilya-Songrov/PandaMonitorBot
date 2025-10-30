@@ -108,7 +108,13 @@ print_status "Stopping existing containers..."
 docker compose down 2>/dev/null || true
 
 print_status "Building Docker image..."
-docker compose build --no-cache
+UBUNTU_VERSION=$(lsb_release -rs 2>/dev/null || echo "unknown")
+if [[ "$UBUNTU_VERSION" == "24.04" ]]; then
+    print_warning "Detected Ubuntu 24.04 — using cache-bypass workaround (no native --no-cache support)"
+    docker compose build --build-arg NO_CACHE=$(date +%s)
+else
+    docker compose build --no-cache
+fi
 
 print_success "Docker image built successfully!"
 
