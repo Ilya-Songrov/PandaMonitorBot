@@ -111,7 +111,7 @@ print_status "Building Docker image..."
 UBUNTU_VERSION=$(lsb_release -rs 2>/dev/null || echo "unknown")
 if [[ "$UBUNTU_VERSION" == "24.04" ]]; then
     print_warning "Detected Ubuntu 24.04 — using cache-bypass workaround (no native --no-cache support)"
-    docker compose build --build-arg NO_CACHE=$(date +%s)
+    docker compose build
 else
     docker compose build --no-cache
 fi
