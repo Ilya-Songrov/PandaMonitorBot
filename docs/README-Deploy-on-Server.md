@@ -21,5 +21,5 @@ DEPLOY_ROOT_DIR='$DIR_WORKING'
 BOT_TOKEN='$BOT_TOKEN'
 ALLOWED_USER_IDS='$ALLOWED_USER_IDS'
 ' >> .env
-./build-and-run-bot.sh
+sudo ./build-and-run-bot.sh
 ```
