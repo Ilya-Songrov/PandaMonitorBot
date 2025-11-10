@@ -15,6 +15,7 @@ cd $DIR_SRC
 git clone https://oauth2:$GIT_TOKEN@github.com/Ilya-Songrov/PandaMonitorBot.git
 cd $DIR_SRC/PandaMonitorBot
 git checkout master
+git pull
 cp .env.example .env
 echo '
 DEPLOY_ROOT_DIR='$DIR_WORKING'
